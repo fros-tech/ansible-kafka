@@ -14,12 +14,6 @@ contrib/offline/offline-files.tar.gz
 vagrant/
 plugins/mitogen
 
-# Ansible inventory
-inventory/*
-!inventory/group_vars
-!inventory/sample-inventory.yml
-inventory/*/artifacts/
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

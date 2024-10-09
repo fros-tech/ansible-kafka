@@ -1,0 +1,33 @@
+all:
+  hosts:
+    host9:
+      ansible_user: data
+      ansible_host: host9
+      ip: 172.16.250.21
+      access_ip: 172.16.250.21
+    host10:
+      ansible_user: data
+      ansible_host: host10
+      ip: 172.16.250.22
+      access_ip: 172.16.250.22
+    host11:
+      ansible_user: data
+      ansible_host: host11
+      ip: 172.16.250.23
+      access_ip: 172.16.250.23
+  children:
+    new-nodes:
+      hosts:
+        host9:
+        host10:
+        host11:
+    controllers:
+      hosts:
+        host9:
+        host10:
+        host11:
+    brokers:
+      hosts:
+        host9:
+        host10:
+        host11:
