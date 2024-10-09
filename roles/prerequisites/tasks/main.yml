@@ -1,0 +1,12 @@
+---
+- name: Install JDK and JRE (Java)
+  become: yes
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600  # one hour 
+    name: "{{ pkgs }}"
+    state: present
+  vars:
+    pkgs:
+    - openjdk-11-jdk
+    - default-jre

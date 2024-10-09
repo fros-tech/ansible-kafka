@@ -1,0 +1,41 @@
+[controllers]
+host1 ansible_host=192.168.0.1 ansible_eno1_ipv4_address=192.168.0.1
+host2 ansible_host=192.168.0.2 ansible_eno1_ipv4_address=192.168.0.2
+host3 ansible_host=192.168.0.3 ansible_eno1_ipv4_address=192.168.0.3
+host4 ansible_host=192.168.0.4 ansible_eno1_ipv4_address=192.168.0.4
+
+
+- name: Set node IDs and controller quorum voters
+  set_fact:
+    node_id: "{{ hostvars[inventory_hostname]['ansible_eno1_ipv4_address'].split('.')[-1] | int }}"
+    voters_list: "{{ groups['controllers'] | map('extract', hostvars, ['ansible_host']) | map('extract', hostvars, ['ansible_eno1_ipv4_address']) | map('regex_replace', '\\.\\d+$', '.' + (hostvars[item]['ansible_eno1_ipv4_address'].split('.')[-1] | int) | string) ) | join(',') }}"
+
+- name: Generate kafka server.properties file
+  become: yes
+  template:
+    src: ../templates/kraft-server.j2
+    dest: "{{ kafka_installation_path }}/config/kraft/server.properties"
+    owner: "{{ kafka_user }}"
+    group: "{{ kafka_group }}"
+    mode: 0755
+    backup: true
+  vars:
+    all_ips_str: "{{ groups['all'] | map('extract', hostvars, ['ansible_host']) | join(',') }}"
+    brokers_ip_str: "{{ groups['brokers'] | map('extract', hostvars, ['ansible_host']) | join(',') }}"
+    new_nodes_ip_str: "{{ groups['new-nodes'] | map('extract', hostvars, ['ansible_host']) | join(',') }}"
+    controllers_ip_str: "{{ groups['controllers'] | map('extract', hostvars, ['ansible_host']) | join(',') }}"
+    all_ips_list: "{{ all_ips_str.split(',') }}"
+    all_brokers_list: "{{ brokers_ip_str.split(',') }}"
+    all_new_nodes_list: "{{ new_nodes_ip_str.split(',') }}"
+    all_controllers_list: "{{ controllers_ip_str.split(',') }}"
+
+
+
+    **** in template for properties ****
+process.roles=broker,controller
+node.id={{ node_id }}
+controller.quorum.voters={{ voters_list }}
+listeners=PLAINTEXT://{{ ansible_host }}:9092,CONTROLLER://{{ ansible_host }}:9093
+advertised.listeners=PLAINTEXT://{{ ansible_host }}:9092
+controller.listener.names=CONTROLLER
+log.dirs=/var/lib/kafka-logs
