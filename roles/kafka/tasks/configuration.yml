@@ -10,22 +10,15 @@
     backup: true
     force: yes
   vars:
-    quorum_voters_list: "{{ groups['hosts'] | map('extract', hostvars, 'node_id') | zip(groups['hosts']) | map('join', '@') | map('regex_replace', '@(.*)', '@\\1:9093') | join(',') }}"
-#    quorum_voters_list: "{{ groups['hosts'] | map('extract', hostvars, 'node_id') | zip(groups['hosts']) | map('join', '@') | join(',') }}"
-#    quorum_voters_list: "{{ groups['hosts'] | map('extract', hostvars, ['node_id']) | map('regex_replace', '(.+)', '\\1@' + inventory_hostname) | join(',') }}"
     all_ips_str: "{{ groups['all'] | map('extract', hostvars, ['node_id']) | join(',') }}"
-    brokers_ip_str: "{{ groups['hosts'] | map('extract', hostvars, ['node_id']) | join(',') }}"
-    new_nodes_ip_str: "{{ groups['new-nodes'] | map('extract', hostvars, ['node_id']) | join(',') }}"
-    controllers_ip_str: "{{ groups['hosts'] | map('extract', hostvars, ['node_id']) | join(',') }}"
+    brokers_ip_str: "{{ groups['worker'] | map('extract', hostvars, ['node_id']) | join(',') }}"
+    new_nodes_ip_str: "{{ groups['all'] | map('extract', hostvars, ['node_id']) | join(',') }}"
+    controllers_ip_str: "{{ groups['controller'] | map('extract', hostvars, ['node_id']) | join(',') }}"
     all_ips_list: "{{ all_ips_str.split(',') }}"
     all_brokers_list: "{{ brokers_ip_str.split(',') }}"
     all_new_nodes_list: "{{ new_nodes_ip_str.split(',') }}"
     all_controllers_list: "{{ controllers_ip_str.split(',') }}"
 
-- name: Show extract result
-  debug:
-    var: current_host
-  
 - name: Create directory for Kafka directories
   become: yes
   file:
@@ -47,9 +40,8 @@
       - "kafka_system_log_dir: {{ kafka_system_log_dir }}"
       - "kafka_installation_path: {{ kafka_installation_path }}"
       - "ansible_host: {{ ansible_host }}"
-#      - "quorum_voters_list {{ quorum_voters_list }}"
-      - "groups['hosts']: {{ groups['hosts'] }}"
-#      - "ip: {{ ip }}"
+      - "groups['workers']: {{ groups['workers'] }}"
+      - "groups['controllers']: {{ groups['controllers'] }}"
 
 - name: Format Kafka log directory
   become: yes
@@ -61,7 +53,6 @@
   template:
     src: ../templates/kafka-service.j2
     dest: "{{ kafka_service_path }}"
-#    dest: "{{ kafka_service_path }}/kafka.service"
     owner: "{{ kafka_user }}"
     group: "{{ kafka_group }}"
     mode: 0755

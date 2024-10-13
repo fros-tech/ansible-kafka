@@ -4,7 +4,7 @@ kafka_user: data
 kafka_group: kafka
 kafka_version: 3.8.0
 scala_version: 2.13
-kafka_log_dir: /var/lib/kafka/data
+kafka_log_dir: /var/lib/kafka
 skip_downloads: false
 kafka_cluster_id: 835f3dd0-fb6e-47a7-bb85-60ec33d8aecd  # Add the existing cluster id here
 kafka_create_user_group: true

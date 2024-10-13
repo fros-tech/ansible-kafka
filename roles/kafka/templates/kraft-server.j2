@@ -24,8 +24,8 @@
 
 # The role of this server. Setting this puts us in KRaft mode
 # TODO:// Make it dynamic!
-process.roles=broker, controller
-
+# process.roles=broker, controller
+process.roles={{ 'broker,controller' if inventory_hostname in groups['controllers'] else 'broker' }}
 # The node id associated with this instance's roles
 # TODO:// Make it better!
 # node.id={{ current_host.split('.')[-1] |int }}
@@ -44,8 +44,9 @@ delete.topic.enable=True
 # controller.quorum.voters={ % for ip in all_controllers_list % }
 # { {loop.index} }@{ {ip} }:9093{ {- "," if not loop.last else "" -} }
 # { % endfor % }
+# controller.quorum.voters={ { quorum_voters_list } }
+controller.quorum.voters={{ groups['controllers'] | map('extract', hostvars, 'node_id') | zip(groups['controllers']) | map('join', '@') | map('regex_replace', '@(.*)', '@\\1:9093') | join(',') }}
 
-controller.quorum.voters={{ quorum_voters_list }}
 
 ############################# Socket Server Settings #############################
 
@@ -57,7 +58,8 @@ controller.quorum.voters={{ quorum_voters_list }}
 #     listeners = listener_name://host_name:port
 #   EXAMPLE:
 #     listeners = PLAINTEXT://your.host.name:9092
-listeners=PLAINTEXT://{{ current_host }}:9092,CONTROLLER://{{ current_host }}:9093
+#listeners=PLAINTEXT://{ { current_host } }:9092,CONTROLLER://{ { current_host } }:9093
+listeners=PLAINTEXT://{{ current_host }}:9092{% if inventory_hostname in groups['controllers'] %},CONTROLLER://{{ current_host }}:9093{% endif %}
 
 # Name of listener used for communication between brokers.
 inter.broker.listener.name=PLAINTEXT

@@ -17,8 +17,13 @@
     state: absent
   become: true
   
-- name: Delete Kafka Log Files
-  ansible.builtin.file:
-    path: "{{ kafka_log_dir }}"
-    state: absent
+- name: Forcefully delete Kafka log directory
+  ansible.builtin.command:
+    cmd: "rm -rf {{ kafka_log_dir }}"
   become: true
+
+#- name: Delete Kafka Log Files
+#  ansible.builtin.file:
+#    path: "{{ kafka_log_dir }}"
+#    state: absent
+#  become: true
