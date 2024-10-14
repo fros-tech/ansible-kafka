@@ -42,5 +42,5 @@
 #    creates: "{{ kafka_installation_path }}/bin/kafka-server-start.sh"
   register: _extract
 
-- name: configuration | set log directory and cluster metadata
+- name: Configuration | set log directory and cluster metadata
   import_tasks: configuration.yml
